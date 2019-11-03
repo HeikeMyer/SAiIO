@@ -23,7 +23,7 @@ def iteration(t, D, R):
 
 def floyd(n, c):
     D = np.copy(c)
-    R = np.empty((n, n))
+    R = np.empty((n, n), dtype=np.int32)
 
     for i in range(n):
         for j in range(n):
@@ -31,6 +31,18 @@ def floyd(n, c):
 
     for t in range(n):
         D, R = iteration(t, D, R)
+
+    return D, R
+
+
+def build_path(i0, j0, R):
+    path = [i0]
+    i = i0
+    while i != j0:
+        i = R[i][j0]
+        path.append(i)
+
+    return path
 
 
 def main():
@@ -53,9 +65,12 @@ def main():
         [np.Inf, np.Inf, np.Inf, np.Inf, 9, 12, 10, 0]
     ])
 
-    print(c)
-    print()
-    floyd(n, c)
+    D, R = floyd(n, c)
+    print(f'D=\n{D}\nR=\n{R}')
+
+    i0, j0 = 0, 4
+    path = build_path(i0, j0, R)
+    print(f'Shortest path from {i0} to {j0}: {path}')
 
 
 if __name__ == '__main__':
