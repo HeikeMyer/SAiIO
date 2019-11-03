@@ -1,23 +1,21 @@
 import numpy as np
 
 
-def iteration(t, D, R, n):
+def iteration(t, D, R):
     D_ = np.copy(D)
     R_ = np.copy(R)
 
     cols = [j for j, d in enumerate(D[t]) if j != t and d != np.Inf]
-    #print('cols', cols)
-
     rows = [i for i, d in enumerate(D[:, t]) if i != t and d != np.Inf]
-    #print('rows', rows)
 
     for i in rows:
         for j in cols:
-            d1 = D[i][j]
-            d2 = D[i][t] + D[t][j]
-            d = d1 if d1 < d2 else d2
-            D_[i][j] = d
-            if d2 > d1:
+            if i == j:
+                continue
+
+            d = D[i][t] + D[t][j]
+            if d < D[i][j]:
+                D_[i][j] = d
                 R_[i][j] = R[i][t]
 
     return D_, R_
@@ -32,15 +30,7 @@ def floyd(n, c):
             R[i][j] = j
 
     for t in range(n):
-        print(f'\n\tt={t}')
-        D, R = iteration(t, D, R, n)
-        print(D)
-        print(R)
-
-
-
-
-
+        D, R = iteration(t, D, R)
 
 
 def main():
@@ -66,7 +56,6 @@ def main():
     print(c)
     print()
     floyd(n, c)
-
 
 
 if __name__ == '__main__':
