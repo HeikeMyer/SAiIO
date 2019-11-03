@@ -94,7 +94,6 @@ def find_max_flow(network_out, arc_flows=None):
 
 
 def main():
-    n = 7
     network_out = [
         {1: 4, 3: 9},
         {3: 2, 4: 4},
@@ -104,41 +103,19 @@ def main():
         {6: 9},
         {}
     ]
-    print('len', len(network_out))
 
-    network_in = [{} for _ in range(n)]
-    for i in range(n):
-        for j, d in network_out[i].items():
-            network_in[j][i] = d
+    # arc_flows = [
+    #     {1: 4, 3: 5},
+    #     {3: 2, 4: 2},
+    #     {4: 1, 5: 0},
+    #     {2: 1, 5: 6},
+    #     {6: 2, 5: 1},
+    #     {6: 7},
+    #     {}
+    # ]
 
-    # print(network_out)
-    # print(network_in)
-
-    arc_flows = [
-        {1: 4, 3: 5},
-        {3: 2, 4: 2},
-        {4: 1, 5: 0},
-        {2: 1, 5: 6},
-        {6: 2, 5: 1},
-        {6: 7},
-        {}
-    ]
-    print(arc_flows)
-
-    #arc_flows = [dict.fromkeys(network_out[i].keys(), 0) for i in range(n)]
-
-
-
-    g = build_increasing_path(network_out, network_in, n, arc_flows)
-    #print(res)
-
-    alpha, path = build_path(network_out, n, g, arc_flows)
-    # print(alpha)
-    # print(path)
-
-    arcs_flow = update_arcs_flow(arc_flows, path, alpha)
-    # print(arc_flows)
-    print(arcs_flow)
+    opt_flow = find_max_flow(network_out)
+    print(opt_flow) # [{1: 4, 3: 6}, {3: 1, 4: 3}, {4: 0, 5: 1}, {2: 1, 5: 6}, {6: 2, 5: 1}, {6: 8}, {}]
 
 
 if __name__ == '__main__':
