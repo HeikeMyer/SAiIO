@@ -90,19 +90,21 @@ def find_max_flow(network_out, arc_flows=None):
         else:
             break
 
-    return arc_flows
+    max_flow = sum(arc_flows[0].values())
+
+    return arc_flows, max_flow
 
 
 def main():
-    network_out = [
-        {1: 4, 3: 9},
-        {3: 2, 4: 4},
-        {4: 1, 5: 10},
-        {2: 1, 5: 6},
-        {6: 2, 5: 1},
-        {6: 9},
-        {}
-    ]
+    # network_out = [
+    #     {1: 4, 3: 9},
+    #     {3: 2, 4: 4},
+    #     {4: 1, 5: 10},
+    #     {2: 1, 5: 6},
+    #     {6: 2, 5: 1},
+    #     {6: 9},
+    #     {}
+    # ]
 
     # arc_flows = [
     #     {1: 4, 3: 5},
@@ -114,8 +116,18 @@ def main():
     #     {}
     # ]
 
-    opt_flow = find_max_flow(network_out)
-    print(opt_flow) # [{1: 4, 3: 6}, {3: 1, 4: 3}, {4: 0, 5: 1}, {2: 1, 5: 6}, {6: 2, 5: 1}, {6: 8}, {}]
+    network_out = [
+        {1: 3, 2: 6, 3: 3, 4: 2},
+        {2: 4, 3: 1, 4: 4},
+        {7: 2, 6: 3},
+        {2: 1, 7: 2, 6: 1},
+        {5: 1},
+        {3: 3, 6: 1},
+        {7: 4},
+        {}]
+
+    opt_flow, max_flow = find_max_flow(network_out)
+    print(f'Max flow value: {max_flow}\n{opt_flow}')
 
 
 if __name__ == '__main__':
