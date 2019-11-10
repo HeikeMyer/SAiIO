@@ -29,7 +29,7 @@ def build_increasing_path(network_out, network_in, n, arc_flows):
             i = p.index(Ic)
         except ValueError:
             print('Current plan is optimal')
-            return False, None, None
+            return False, None, L
 
     return True, g, L
 
@@ -92,7 +92,7 @@ def find_max_flow(network_out, arc_flows=None):
 
     max_flow = sum(arc_flows[0].values())
 
-    return arc_flows, max_flow
+    return arc_flows, max_flow, L
 
 
 def main():
@@ -126,7 +126,7 @@ def main():
         {7: 4},
         {}]
 
-    opt_flow, max_flow = find_max_flow(network_out)
+    opt_flow, max_flow, L = find_max_flow(network_out)
     print(f'Max flow value: {max_flow}\n{opt_flow}')
 
 
