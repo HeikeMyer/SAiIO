@@ -2,11 +2,37 @@ import numpy as np
 
 
 def build_potentials(Ustr, Ub, n):
+    # print(Ustr, Ub_str, n)
+    u = [None] * n
+    u[0] = 0
+
+    queue = [0]
+    print('qy=ueue',queue)
+
+    while queue:
+        i = queue.pop()
+        print(f'i={i}, u={u}')
+        for j in Ub[i]:
+            if u[j] is None:
+                print(f'\ti={i}, j={j} u[i]={u[i]}')
+                u[j] = u[i] - Ustr[i][j] if j in Ustr[i].keys() else u[i] + Ustr[j][i]
+                queue.append(j)
+
+    return u
+
+
+
+def build_potentials2(Ustr, Ub, n):
+    #print(Ustr, Ub_str, n)
+
+
     u = [None] * n
     u[0] = 0
     for i in range(n):
+        print(f'i={i}, u={u}')
         for j in Ub[i]:
             if u[j] is None:
+                print(f'\ti={i}, j={j} u[i]={u[i]}')
                 u[j] = u[i] - Ustr[i][j] if j in Ustr[i].keys() else u[i] + Ustr[j][i]
 
     return u
@@ -23,20 +49,14 @@ def build_Un(U_str, Ub_str, n):
     return Un_str
 
 
-def build_delta(U_str, Un_str, u, n):
-    delta = {}
-    #print(U_str)
-    #print(u)
+def is_optimal(U_str, Un_str, u):
     for i, arcs in enumerate(Un_str):
         for j in arcs:
             val = u[i] - u[j] - U_str[i][j]
             if val > 0:
-                return i, j
-            delta[(i, j)] = val
-            #print('\t', u[i], u[j], U_str[i][j])
+                return False, i, j
 
-    return -1, -1
-    #print(delta)
+    return True, -1, -1
 
 
 def build_graph(U_str, n):
@@ -92,6 +112,43 @@ def find_cycle(i0, j0, graph, n):
     return cycle
 
 
+def solve(U_str, x, Ub_str, Un_str, n):
+    #print(U_str, x, Ub_str, Un_str, n)
+    t = 0
+    while True:
+        print(f't={t}')
+        print(f'Ub={Ub_str}')
+        u = build_potentials(U_str, build_graph(Ub_str, n), n)
+        print(f'u={u}')
+        is_opt, i0, j0 = is_optimal(U_str, Un_str, u)
+        if is_opt:
+            return True, x, Ub_str
+
+        Ub_str[i0].append(j0)
+        cycle = find_cycle(i0, j0, build_graph(Ub_str, n), n)
+
+        teta0 = np.Inf
+        i_min, j_min = -1, -1
+        for i, j in cycle:
+            if i in U_str[j].keys():
+                if x[j][i] < teta0:
+                    teta0 = x[j][i]
+                    i_min, j_min = j, i
+
+        if teta0 == np.Inf:
+            return False, None, None
+
+        for i, j in cycle:
+            if j in U_str[i].keys():
+                x[i][j] += teta0
+            else:
+                x[j][i] -= teta0
+
+        Ub_str[i_min].remove(j_min)
+
+        Un_str = build_Un(U_str, Ub_str, n)
+        t+=1
+
 
 def main():
     n = 6
@@ -136,86 +193,48 @@ def main():
 
     Un_str = build_Un(network_out, Ub_str, n)
 
-    u = build_potentials(network_out, build_graph(Ub_str, n), n)
-    #print(u)
+    has_solutions, min_flow, Ub = solve(network_out, arc_flows, Ub_str, Un_str, n)
+    print(has_solutions, min_flow, '\n', Ub)
 
-    i0, j0 = build_delta(network_out, Un_str, u, n)
-    #print(i0, j0)
-
-    Ub_str[i0].append(j0)
-
-    cycle = find_cycle(i0, j0, build_graph(Ub_str, n), n)
-
-    #print(cycle)
-
-    min_flow = np.Inf
-    min_arc = None
-    for i, j in cycle:
-        if i in network_out[j].keys():
-            val = arc_flows[j][i];
-            if val < min_flow:
-                min_flow = val
-                min_arc = (j, i)
-
-    #print(min_flow, min_arc)
-
-    #rebuild flows
-    for i, j in cycle:
-        if j in network_out[i].keys():
-            arc_flows[i][j] += min_flow
-        else:
-            arc_flows[j][i] -= min_flow
-
-    #print(arc_flows)
-
-    print(Ub_str)
-    Ub_str[min_arc[0]].remove(min_arc[1])
-    print(Ub_str)
+    # u = build_potentials(network_out, build_graph(Ub_str, n), n)
+    # #print(u)
+    #
+    # i0, j0 = build_delta(network_out, Un_str, u, n)
+    # #print(i0, j0)
+    #
+    # Ub_str[i0].append(j0)
+    #
+    # cycle = find_cycle(i0, j0, build_graph(Ub_str, n), n)
+    #
+    # #print(cycle)
+    #
+    # min_flow = np.Inf
+    # min_arc = None
+    # for i, j in cycle:
+    #     if i in network_out[j].keys():
+    #         val = arc_flows[j][i];
+    #         if val < min_flow:
+    #             min_flow = val
+    #             min_arc = (j, i)
+    #
+    # #print(min_flow, min_arc)
+    #
+    # #rebuild flows
+    # for i, j in cycle:
+    #     if j in network_out[i].keys():
+    #         arc_flows[i][j] += min_flow
+    #     else:
+    #         arc_flows[j][i] -= min_flow
+    #
+    # #print(arc_flows)
+    #
+    # print(Ub_str)
+    # Ub_str[min_arc[0]].remove(min_arc[1])
+    # print(Ub_str)
 
 
     # print(network_out)
     # print(intensities)
-
-
-
-
-
-
-#def main():
-    # n = 9
-    # graph = [
-    #     [1],
-    #     [0, 2, 5],
-    #     [1, 3, 4],
-    #     [2],
-    #     [2, 5],
-    #     [1, 4, 6, 8],
-    #     [5, 7],
-    #     [6],
-    #     [5]
-    # ]
-    # i0, j0 = 1, 5
-
-    # n = 12
-    # graph = [
-    #     [1],
-    #     [0, 3, 5],
-    #     [3],
-    #     [1, 2, 4],
-    #     [3, 7],
-    #     [1, 6],
-    #     [10, 8, 7, 5],
-    #     [4, 6],
-    #     [6],
-    #     [10],
-    #     [6, 9, 11],
-    #     [10]
-    # ]
-    # i0, j0 = 6, 7
-
-    # find_cycle(i0, j0, graph, n)
-    #
-    # print('fuck')
 
 
 if __name__ == '__main__':
