@@ -79,21 +79,21 @@ def find_cycle(i0, j0, graph, n):
     return cycle
 
 
-def solve(U_str, x, Ub_str, Un_str, n):
+def solve(U_out, x, Ub_out, Un_out, n):
     while True:
-        u = build_potentials(U_str, build_non_oriented_graph(Ub_str, n), n)
+        u = build_potentials(U_out, build_non_oriented_graph(Ub_out, n), n)
 
-        is_opt, i0, j0 = is_optimal(U_str, Un_str, u)
+        is_opt, i0, j0 = is_optimal(U_out, Un_out, u)
         if is_opt:
-            return True, x, Ub_str
+            return True, x, Ub_out
 
-        Ub_str[i0].append(j0)
-        cycle = find_cycle(i0, j0, build_non_oriented_graph(Ub_str, n), n)
+        Ub_out[i0].append(j0)
+        cycle = find_cycle(i0, j0, build_non_oriented_graph(Ub_out, n), n)
 
         teta0 = np.Inf
         i_min, j_min = -1, -1
         for i, j in cycle:
-            if i in U_str[j].keys():
+            if i in U_out[j].keys():
                 if x[j][i] < teta0:
                     teta0 = x[j][i]
                     i_min, j_min = j, i
@@ -102,13 +102,13 @@ def solve(U_str, x, Ub_str, Un_str, n):
             return False, None, None
 
         for i, j in cycle:
-            if j in U_str[i].keys():
+            if j in U_out[i].keys():
                 x[i][j] += teta0
             else:
                 x[j][i] -= teta0
 
-        Ub_str[i_min].remove(j_min)
-        Un_str = build_Un_out(U_str, Ub_str, n)
+        Ub_out[i_min].remove(j_min)
+        Un_out = build_Un_out(U_out, Ub_out, n)
 
 
 def calculate_cost(network_out, x, n):
@@ -182,7 +182,6 @@ def main():
 
     has_solutions, x_opt, Ub = solve(network_out, x, Ub_out, Un_out, n)
     if has_solutions:
-
         print(f'Min cost flow: {x_opt}\nCost: {calculate_cost(network_out, x_opt, n)}')
 
 
